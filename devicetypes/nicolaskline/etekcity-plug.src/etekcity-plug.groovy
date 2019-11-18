@@ -52,7 +52,7 @@ metadata {
           state "blank", label: "", action: "", icon: "", backgroundColor: "#FFFFFF"
         }
         standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat", height: 2, width: 6) {
-			state "default", label:"Refresh", action:"refresh", icon: "st.secondary.refresh"
+			state "default", label:"", action:"refresh", icon: "st.secondary.refresh"
         }
 		main "button"
 		details (["rich-control","onButton","offButton","refresh"])
