@@ -62,16 +62,16 @@ metadata {
 
 
 def updated() {
-	handler("Updated")
-    log.trace("Username ${username}")
+	log.trace("Updated")
+	log.trace("Username ${username}")
 	log.trace("Plug Name ${plug_name}")
     
 	initialize()
 }
 
 def installed() {
-	handler("installed")
-    log.trace("Username ${username}")
+	log.trace("installed")
+	log.trace("Username ${username}")
 	log.trace("Plug Name ${plug_name}")
     
     initialize()
