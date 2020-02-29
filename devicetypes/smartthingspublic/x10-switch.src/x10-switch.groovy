@@ -15,6 +15,10 @@ preferences {
         input "unit_code", "text", title: "X10 Unit Code", required: true
         input "username", "text", title: "Username for hub", required: true
         input "password", "password", title: "Password for hub", required: true
+       /* input "command_delay", "text", title: "X10 command delay", required: false
+        input "address_attempts", "text", title: "Address command attempts", required: false
+        input "signal_attempts", "text", title: "Signal command attempts", required: false
+        */
 	}
 }
 
@@ -32,6 +36,7 @@ metadata {
         command "doX10"
         command "on"
         command "off"
+        command "dimOn"
 	}
 
 	// simulator metadata
@@ -40,6 +45,17 @@ metadata {
 
 	// UI tile definitions
 	tiles {
+    multiAttributeTile(name:"rich-control", type: "lighting", width: 6, height: 4, canChangeIcon: true){
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "on", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#00A0DC", nextState:"turningOff"
+				attributeState "off", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff", nextState:"turningOn"
+				attributeState "turningOn", label:'${name}', action:"switch.off", icon:"st.lights.philips.hue-single", backgroundColor:"#00A0DC", nextState:"turningOff"
+				attributeState "turningOff", label:'${name}', action:"switch.on", icon:"st.lights.philips.hue-single", backgroundColor:"#ffffff", nextState:"turningOn"
+			}
+			tileAttribute ("device.level", key: "SLIDER_CONTROL") {
+				attributeState "level", action:"switch level.setLevel", range:"(0..100)"
+            }
+		}
 		standardTile("button", "device.switch", width: 2, height: 2, canChangeIcon: true) {
 			state "off", label: 'Off', action: "switch.on", icon: "st.Lighting.light11", backgroundColor: "#ffffff", nextState: "on"
 			state "on", label: 'On', action: "switch.off", icon: "st.Lighting.light11", backgroundColor: "#79b821", nextState: "off"
@@ -56,8 +72,14 @@ metadata {
 		standardTile("brightenButton", "device.button", width: 1, height: 1, canChangeIcon: true) {
 			state "default", label: '+', action: "brighten", icon: "st.Lighting.light11", backgroundColor: "#ffffff"
 		}
+        standardTile("blank", "device.image", width: 1, height: 1, canChangeIcon: false,  canChangeBackground: false, decoration: "flat") {
+          state "blank", label: "", action: "", icon: "", backgroundColor: "#FFFFFF"
+        }
+        standardTile ("levelSlide", "device.level") {
+			state "level", action:"switch level.setLevel", range:"(0..100)"
+        }
 		main "button"
-		details (["button","onButton","offButton", "brightenButton", "dimButton"])
+		details (["rich-control","onButton","offButton", "brightenButton", "dimButton"])
 	}
 }
 
@@ -108,6 +130,10 @@ def dim() {
 	doX10(dim)
 }
 
+def dimOn() {
+    setLevel(50)
+}
+
 def setLevel(value) {
 	log.debug "setLevel to: ${value}"
 	def valueaux = (value / 10) as Integer
@@ -122,7 +148,7 @@ def setLevel(value) {
     */
 	
     // If device is off, dim up
-    off()
+    //off()
     
     def dimUp = {
        brighten()
@@ -154,11 +180,26 @@ def off() {
 }
 
 def doX10(def command) {
-	def x10 = '0263'
+	/*def cmd_delay = 0;
+	if (${command_delay} == null || ${command_delay} == 0) {
+    	cmd_delay = 400;
+    }
+    
+    log.debug("Command Delay: ${command_delay}")
+        */
+    def x10 = '0263'
 	def house = getHouseCode(house_code)
     def unit = getUnitCode(unit_code)
     
-    def hubActions = [hubGet("/3?${x10}${house}${unit}=I=3", true), delayAction(200), hubGet("/3?${x10}${house}${command}=I=3", true)]
+    def hubActions = [hubGet("/3?${x10}${house}${unit}=I=3", true), 
+    				  delayAction(100),
+                      hubGet("/3?${x10}${house}${unit}=I=3", true), 
+                      delayAction(300), 
+                      hubGet("/3?${x10}${house}${command}=I=3", true), 
+                      delayAction(100), 
+                      hubGet("/3?${x10}${house}${command}=I=3", true), 
+                      delayAction(100), 
+                      hubGet("/3?${x10}${house}${command}=I=3", true)]
   	
     hubActions
 }
