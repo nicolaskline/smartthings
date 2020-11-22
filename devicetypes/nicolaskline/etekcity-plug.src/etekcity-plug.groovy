@@ -141,6 +141,7 @@ void setDeviceToken() {
 void setDeviceId(plug) {
 	log.trace "Getting device ID for ${plug}"
 	def data = webGet("/vold/user/devices")
+	log.trace "Found Devices: \n${data}"
 	
 	data.each {
 		if (it["deviceName"] == plug) {
